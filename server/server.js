@@ -7,20 +7,21 @@ const app = express()
 app.use(express.json())
 
 // GET ALL CLOTHING
-app.get("/api/v1/test", async (req, res) =>{
-    //"/api/v1/clothing"
+app.get("/api/v1/clothing/:userEmail", async (req, res) =>{
+  console.log(req)
+  const userEmail = req.params
     try{
-        const results = await db.query("select * from test")
-        //const results = await db.query("select * from clothing")
-        console.log(results);
-        res.status(200).json({
-            status: "complete",
-            results: results.rows.length,
-            data: {
-                test: results.rows
-                //clothing: results.rows
-            }
-        })
+        const results = await db.query("SELECT * FROM clothing WHERE user_email = $1;", [userEmail])
+        res.json(results.rows)
+        // console.log(results);
+        // res.status(200).json({
+        //     status: "complete",
+        //     results: results.rows.length,
+        //     data: {
+        //         test: results.rows
+        //         //clothing: results.rows
+        //     }
+        // })
     } catch (err) {
         console.log(err)
     }
@@ -30,7 +31,7 @@ app.get("/api/v1/test", async (req, res) =>{
 app.get("/api/v1/test/:id", async (req,res) => {
     //"/api/v1/clothing/:id"
     try{
-        const results = await db.query("select * from test where id = $1", [req.params.id])
+        const results = await db.query("select * from test where id = $1;", [req.params.id])
         //const results = await db.query("select * from clothing where id = $1", [req.params.id])
         
         res.status(200).json({
@@ -46,57 +47,52 @@ app.get("/api/v1/test/:id", async (req,res) => {
 })
 
 // CREATE CLOTHING ITEM 
-app.post("/api/v1/test", async (req, res) => {
-    //"/api/v1/clothing"
+app.post("/api/v1/clothing", async (req, res) => {
+    const { } = req.body
     try {
       const results = await db.query(
-        "INSERT INTO test (name, score) values ($1, $2) returning *",
-        [req.body.name, req.body.score]
+        "INSET INTO clothing (user_email, photo, title, category, color, notes, favorite) values ($1, $2, $3, $4, $5, $6, $7) returning *;",
+        [req.body.user_email, req.body.photo, req.body.title, req.body.category, req.body.color, req.body.notes, req.body.favorite]
       );
-      //INSET INTO clothing (photo, title, category, color, notes, favorite) values ($1, $2, $3, $4, $5, $6) returning *
-      //[req.body.photo, req.body.title, req.body.category, req.body.color, req.body.notes, req.body.favorite]
-      console.log(results);
-      res.status(200).json({
-        status: "complete",
-        data: {
-          test: results.rows[0],
-          //clothing: results.rows[0]
-        },
-      });
+      res.json(results)
+      // console.log(results);
+      // res.status(200).json({
+      //   status: "complete",
+      //   data: {
+      //     test: results.rows[0],
+      //     //clothing: results.rows[0]
+      //   },
+      // });
     } catch (err) {
       console.log(err);
     }
   });
 
-// UPDATE CLOTHING ITEM 
-app.put("/api/v1/test/:id", async (req, res) => {
-    //"/api/v1/clothing/:id"
+// EDIT CLOTHING ITEM 
+app.put("/api/v1/clothing/:id", async (req, res) => {
+    const { id } = req.params
     try {
       const results = await db.query(
-        "UPDATE test SET name = $1, score = $2  where id = $3 returning *",
-        [req.body.name, req.body.score, req.params.id]
+        "UPDATE clothing SET user_email = $1, photo = $2, title = $3, category = $4, color = $5, notes = $6, favorite = $7  WHERE id = $8 returning *;",
+        [req.body.photo, req.body.title, req.body.category, req.body.color, req.body.notes, req.body.favorite, req.params.id]
       );
-      //UPDATE clothing SET photo = $1, title = $2, category = $3, color = $4, notes = $5, favorite = $6  where id = $7 returning *
-      //[req.body.photo, req.body.title, req.body.category, req.body.color, req.body.notes, req.body.favorite, req.params.id]
-  
-      res.status(200).json({
-        status: "complete",
-        data: {
-          test: results.rows[0],
-          //clothing: results.rows[0]
-        },
-      });
+      res.json(results)
+      // res.status(200).json({
+      //   status: "complete",
+      //   data: {
+      //     test: results.rows[0],
+      //     //clothing: results.rows[0]
+      //   },
+      // });
     } catch (err) {
       console.log(err);
     }
   });
 
 // DELETE CLOTHING ITEM
-app.delete("/api/v1/test/:id", async (req, res) => {
-    //"/api/v1/clothing/:id"
+app.delete("/api/v1/clothing/:id", async (req, res) => {
     try {
-      const results = db.query("DELETE FROM test where id = $1", [req.params.id]);
-      //const results = db.query("DELETE FROM clothing where id = $1", [req.params.id]);
+      const results = db.query("DELETE FROM clothing WHERE id = $1;", [req.params.id]);
       res.status(200).json({
         status: "complete",
       });
@@ -104,6 +100,26 @@ app.delete("/api/v1/test/:id", async (req, res) => {
       console.log(err);
     }
   });
+
+// SIGNUP
+app.post("/signup", async (req, res) => {
+  const { email, password } = req.body
+  try {
+
+  }catch (err) {
+    console.error(err)
+  }
+})
+
+// LOGIN
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body
+  try {
+
+  }catch (err) {
+    console.error(err)
+  }
+})
 
 app.listen(process.env.PORT, () => {
     console.log(`Server is running on http://localhost:${process.env.PORT}`);
